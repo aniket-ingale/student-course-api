@@ -1,0 +1,25 @@
+# Binaries
+/bin/
+*.exe
+*.out
+
+# Env files (keep .env.example)
+.env
+.env.local
+
+# Go
+*.test
+*.prof
+coverage.out
+coverage.html
+/vendor/
+
+# Local temp/working files
+.tmp/
+
+# Editor / IDE
+.idea/
+*.swp
+
+# OS
+.DS_Store
