@@ -14,8 +14,11 @@ import (
 
 // fakeRepo is a configurable StudentRepository for unit tests.
 type fakeRepo struct {
-	getFn  func(ctx context.Context, id int) (model.Student, error)
-	listFn func(ctx context.Context) ([]model.Student, error)
+	getFn    func(ctx context.Context, id int) (model.Student, error)
+	listFn   func(ctx context.Context) ([]model.Student, error)
+	createFn func(ctx context.Context, s model.Student) (model.Student, error)
+	updateFn func(ctx context.Context, s model.Student) (model.Student, error)
+	deleteFn func(ctx context.Context, id int) error
 }
 
 func (f *fakeRepo) GetByID(ctx context.Context, id int) (model.Student, error) {
@@ -24,6 +27,18 @@ func (f *fakeRepo) GetByID(ctx context.Context, id int) (model.Student, error) {
 
 func (f *fakeRepo) List(ctx context.Context) ([]model.Student, error) {
 	return f.listFn(ctx)
+}
+
+func (f *fakeRepo) Create(ctx context.Context, s model.Student) (model.Student, error) {
+	return f.createFn(ctx, s)
+}
+
+func (f *fakeRepo) Update(ctx context.Context, s model.Student) (model.Student, error) {
+	return f.updateFn(ctx, s)
+}
+
+func (f *fakeRepo) Delete(ctx context.Context, id int) error {
+	return f.deleteFn(ctx, id)
 }
 
 func TestGetByID(t *testing.T) {
