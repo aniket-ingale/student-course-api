@@ -6,6 +6,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strings"
 
 	"github.com/aniket/student-course-api/internal/apperr"
 	"github.com/aniket/student-course-api/internal/model"
@@ -37,6 +38,22 @@ func (s *StudentService) GetByID(ctx context.Context, id int) (model.Student, er
 		return model.Student{}, fmt.Errorf("service: get student %d: %w", id, err)
 	}
 	return student, nil
+}
+
+// validateStudentWrite enforces the shared input rules for create/update:
+// name and address must be non-empty after trimming, and grade must be a
+// positive integer. Violations return an apperr.Validation (mapped to 400).
+func validateStudentWrite(s model.Student) error {
+	if strings.TrimSpace(s.Name) == "" {
+		return apperr.Validation("name must not be empty")
+	}
+	if strings.TrimSpace(s.Address) == "" {
+		return apperr.Validation("address must not be empty")
+	}
+	if s.Grade < 1 {
+		return apperr.Validation("grade must be a positive integer")
+	}
+	return nil
 }
 
 // List returns all students.

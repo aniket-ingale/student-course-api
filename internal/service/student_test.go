@@ -120,6 +120,44 @@ func TestGetByID(t *testing.T) {
 	}
 }
 
+func TestValidateStudentWrite(t *testing.T) {
+	valid := model.Student{Name: "Ada", Address: "London", Grade: 10}
+
+	tests := []struct {
+		name       string
+		in         model.Student
+		wantErr    bool
+		wantStatus int // expected HTTP status via apperr.HTTPStatus
+	}{
+		{name: "valid", in: valid},
+		{name: "high grade has no upper bound", in: model.Student{Name: "Ada", Address: "London", Grade: 99}},
+		{name: "empty name", in: model.Student{Name: "", Address: "London", Grade: 10}, wantErr: true, wantStatus: http.StatusBadRequest},
+		{name: "whitespace name", in: model.Student{Name: "   ", Address: "London", Grade: 10}, wantErr: true, wantStatus: http.StatusBadRequest},
+		{name: "empty address", in: model.Student{Name: "Ada", Address: "", Grade: 10}, wantErr: true, wantStatus: http.StatusBadRequest},
+		{name: "whitespace address", in: model.Student{Name: "Ada", Address: "  ", Grade: 10}, wantErr: true, wantStatus: http.StatusBadRequest},
+		{name: "zero grade", in: model.Student{Name: "Ada", Address: "London", Grade: 0}, wantErr: true, wantStatus: http.StatusBadRequest},
+		{name: "negative grade", in: model.Student{Name: "Ada", Address: "London", Grade: -3}, wantErr: true, wantStatus: http.StatusBadRequest},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			err := validateStudentWrite(tc.in)
+			if tc.wantErr {
+				if err == nil {
+					t.Fatalf("expected error, got nil")
+				}
+				if status, _ := apperr.HTTPStatus(err); status != tc.wantStatus {
+					t.Fatalf("status = %d, want %d (err: %v)", status, tc.wantStatus, err)
+				}
+				return
+			}
+			if err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
+		})
+	}
+}
+
 func TestList(t *testing.T) {
 	t.Run("returns students", func(t *testing.T) {
 		want := []model.Student{{StudentID: 1, Name: "Ada"}, {StudentID: 2, Name: "Alan"}}
